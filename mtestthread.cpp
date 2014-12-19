@@ -10,8 +10,17 @@ MTestThread::MTestThread(QObject *parent) : QThread(parent){
 
     m_timer = new QTimer(this);
     m_timer->setSingleShot(true);
-    m_timer->setInterval(5000);
+    m_timer->setInterval(2000);
     connect(m_timer,SIGNAL(timeout()),this,SLOT(timeoutSlot()));
+
+    m_timerLoose = new QTimer(this);
+    m_timerLoose->setSingleShot(true);
+    m_timerLoose->setInterval(10000);
+    connect(m_timerLoose,SIGNAL(timeout()),this,SLOT(resendSlot()));
+
+    m_err = 0;
+    m_loose = 0;
+    m_count = 0;
 }
 
 MTestThread::~MTestThread() {
@@ -34,8 +43,10 @@ void MTestThread::newBinMsgFromServer(QByteArray in) {
     QString zz;
     zz.append(in);
     if ( in.size()!=zz.size() ) {
-        qlDebug() << "Size incorrect!" << in.size() << zz.size();
+        ++m_err;
+        qlDebug() << "Size incorrect!" << in.size() << zz.size() << m_err << m_loose;
     }
+    m_timerLoose->stop();
     m_timer->start();
 }
 
@@ -54,4 +65,14 @@ void MTestThread::timeoutSlot() {
         zz.append("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789\r\n");
     }
     m_netManager->sendBinaryMessage(zz);
+    m_timerLoose->start();
+
+    ++m_count;
+    if ( m_count%10==0 ) qlDebug() << "Total:" << m_count << "Error:" << m_err << "Lost:" << m_loose;
 }
+
+void MTestThread::resendSlot() {
+    ++m_loose;
+    timeoutSlot();
+}
+

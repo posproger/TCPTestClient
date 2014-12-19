@@ -25,11 +25,17 @@ public slots:
     void socketDisconnected();
     void socketConnected();
     void timeoutSlot();
+    void resendSlot();
 
 private:
     QTcpSocket * m_socket;
     QLClientNetManager * m_netManager;
     QTimer * m_timer;
+    QTimer * m_timerLoose;
+
+    int m_count;
+    int m_loose;
+    int m_err;
 
 };
 
