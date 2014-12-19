@@ -10,7 +10,7 @@ MTestThread::MTestThread(QObject *parent) : QThread(parent){
 
     m_timer = new QTimer(this);
     m_timer->setSingleShot(true);
-    m_timer->setInterval(2000);
+    m_timer->setInterval(1500);
     connect(m_timer,SIGNAL(timeout()),this,SLOT(timeoutSlot()));
 
     m_timerLoose = new QTimer(this);
