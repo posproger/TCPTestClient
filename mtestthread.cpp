@@ -73,6 +73,7 @@ void MTestThread::timeoutSlot() {
 
 void MTestThread::resendSlot() {
     ++m_loose;
+    m_netManager->tryRefreshTcp();
     timeoutSlot();
 }
 
