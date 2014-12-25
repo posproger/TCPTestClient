@@ -7,10 +7,11 @@ MTestThread::MTestThread(QObject *parent) : QThread(parent){
     connect(m_netManager,SIGNAL(newBinaryMessageReceived(QByteArray)),this,SLOT(newBinMsgFromServer(QByteArray)));
     connect(m_netManager,SIGNAL(socketDisconnected()),this,SLOT(socketDisconnected()));
     connect(m_netManager,SIGNAL(socketConnected()),this,SLOT(socketConnected()));
+    connect(m_netManager,SIGNAL(binaryMessageSent(quint32)),this,SLOT(binaryMessageSent(quint32)));
 
     m_timer = new QTimer(this);
     m_timer->setSingleShot(true);
-    m_timer->setInterval(1500);
+    m_timer->setInterval(2000);
     connect(m_timer,SIGNAL(timeout()),this,SLOT(timeoutSlot()));
 
     m_timerLoose = new QTimer(this);
@@ -21,6 +22,8 @@ MTestThread::MTestThread(QObject *parent) : QThread(parent){
     m_err = 0;
     m_loose = 0;
     m_count = 0;
+
+    m_packetN = 1;
 }
 
 MTestThread::~MTestThread() {
@@ -46,7 +49,7 @@ void MTestThread::newBinMsgFromServer(QByteArray in) {
         ++m_err;
         qlDebug() << "Size incorrect!" << in.size() << zz.size() << m_err << m_loose;
     }
-    m_timerLoose->stop();
+    //m_timerLoose->stop();
     m_timer->start();
 }
 
@@ -64,16 +67,25 @@ void MTestThread::timeoutSlot() {
     for ( int i=0; i<60000; ++i ) {
         zz.append("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789\r\n");
     }
-    m_netManager->sendBinaryMessage(zz);
-    m_timerLoose->start();
+    if ( m_packetN<900001 ) {
+        m_netManager->sendBinaryMessage(zz, m_packetN++);
+    } else {
+        qlDebug() << "Total:" << m_count << "Error:" << m_err << "Lost:" << m_loose << "Cur.Packet:" << m_packetN;
+        qlDebug() << "Test stop...";
+    }
+    //m_timerLoose->start();
 
     ++m_count;
-    if ( m_count%10==0 ) qlDebug() << "Total:" << m_count << "Error:" << m_err << "Lost:" << m_loose;
+    if ( m_count%10==0 ) qlDebug() << "Total:" << m_count << "Error:" << m_err << "Lost:" << m_loose << "Cur.Packet:" << m_packetN;
 }
 
 void MTestThread::resendSlot() {
     ++m_loose;
     m_netManager->tryRefreshTcp();
     timeoutSlot();
+}
+
+void MTestThread::binaryMessageSent(quint32 packetN) {
+    qlDebug() << packetN;
 }
 
