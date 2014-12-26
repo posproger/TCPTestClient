@@ -64,7 +64,7 @@ void MTestThread::socketConnected() {
 
 void MTestThread::timeoutSlot() {
     QByteArray zz;
-    for ( int i=0; i<60000; ++i ) {
+    for ( int i=0; i<6; ++i ) {
         zz.append("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789\r\n");
     }
     if ( m_packetN<900001 ) {
