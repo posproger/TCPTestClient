@@ -13,6 +13,7 @@ public:
     ~MTestCore();
 
 signals:
+    void checkStatistics(void);
 
 protected:
     void run();

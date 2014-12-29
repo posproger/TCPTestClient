@@ -3,7 +3,7 @@
 #include <QUrl>
 
 MTestThread::MTestThread(QObject *parent) : QThread(parent){
-    m_netManager = new QLClientNetManager(0, 0);
+    m_netManager = new QLClientNetManager(0, 0, this);
     connect(m_netManager,SIGNAL(newBinaryMessageReceived(QByteArray)),this,SLOT(newBinMsgFromServer(QByteArray)));
     connect(m_netManager,SIGNAL(socketDisconnected()),this,SLOT(socketDisconnected()));
     connect(m_netManager,SIGNAL(socketConnected()),this,SLOT(socketConnected()));
@@ -11,7 +11,7 @@ MTestThread::MTestThread(QObject *parent) : QThread(parent){
 
     m_timer = new QTimer(this);
     m_timer->setSingleShot(true);
-    m_timer->setInterval(2000);
+    m_timer->setInterval(32);
     connect(m_timer,SIGNAL(timeout()),this,SLOT(timeoutSlot()));
 
     m_timerLoose = new QTimer(this);
@@ -49,6 +49,16 @@ void MTestThread::newBinMsgFromServer(QByteArray in) {
         ++m_err;
         qlDebug() << "Size incorrect!" << in.size() << zz.size() << m_err << m_loose;
     }
+
+    QByteArray zz1;
+    for ( int i=0; i<60000; ++i ) {
+        zz1.append("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789\r\n");
+    }
+    if ( in != zz1) {
+        ++m_err;
+        qlDebug() << "Packet incorrect!" << qChecksum(in.constData(),in.size()) << qChecksum(zz1.constData(),zz1.size()) << m_err;
+    }
+
     //m_timerLoose->stop();
     m_timer->start();
 }
@@ -64,7 +74,7 @@ void MTestThread::socketConnected() {
 
 void MTestThread::timeoutSlot() {
     QByteArray zz;
-    for ( int i=0; i<6; ++i ) {
+    for ( int i=0; i<60000; ++i ) {
         zz.append("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789\r\n");
     }
     if ( m_packetN<900001 ) {
@@ -76,7 +86,7 @@ void MTestThread::timeoutSlot() {
     //m_timerLoose->start();
 
     ++m_count;
-    if ( m_count%10==0 ) qlDebug() << "Total:" << m_count << "Error:" << m_err << "Lost:" << m_loose << "Cur.Packet:" << m_packetN;
+    //if ( m_count%10==0 ) qlDebug() << "Total:" << m_count << "Error:" << m_err << "Lost:" << m_loose << "Cur.Packet:" << m_packetN;
 }
 
 void MTestThread::resendSlot() {
@@ -86,6 +96,10 @@ void MTestThread::resendSlot() {
 }
 
 void MTestThread::binaryMessageSent(quint32 packetN) {
-    qlDebug() << packetN;
+    qlDebug() << packetN << QDateTime::currentDateTime();
+}
+
+void MTestThread::checkStatistics(void) {
+    qlDebug() << "Total:" << m_count << "Errors:" << m_err;
 }
 

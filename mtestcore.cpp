@@ -4,6 +4,7 @@
 MTestCore::MTestCore(QObject * parent) : QThread(parent) {
     m_thread = new MTestThread();
     m_thread->moveToThread(m_thread);
+    connect(this,SIGNAL(checkStatistics()),m_thread,SLOT(checkStatistics()));
 }
 
 MTestCore::~MTestCore() {

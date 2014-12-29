@@ -27,6 +27,7 @@ public slots:
     void timeoutSlot();
     void resendSlot();
     void binaryMessageSent(quint32 packetN);
+    void checkStatistics(void);
 
 private:
     QTcpSocket * m_socket;
