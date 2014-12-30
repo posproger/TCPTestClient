@@ -3,7 +3,7 @@
 #include <QUrl>
 
 MTestThread::MTestThread(QObject *parent) : QThread(parent){
-    m_netManager = new QLClientNetManager(0, 0, this);
+    m_netManager = new QLClientNetManager(0, this);
     connect(m_netManager,SIGNAL(newBinaryMessageReceived(QByteArray)),this,SLOT(newBinMsgFromServer(QByteArray)));
     connect(m_netManager,SIGNAL(socketDisconnected()),this,SLOT(socketDisconnected()));
     connect(m_netManager,SIGNAL(socketConnected()),this,SLOT(socketConnected()));
@@ -36,7 +36,7 @@ void MTestThread::run() {
     QTcpSocket * m_tcpSocket = new QTcpSocket();
     m_netManager->setTCPSocket(m_tcpSocket);
     QUrl m_url;
-    m_url.setHost("81.177.167.73"); // "localhost" "81.177.167.73"
+    m_url.setHost("localhost"); // "localhost" "81.177.167.73"
     m_url.setPort(8085-1);
     m_netManager->makeConnect(m_url);
     exec();
