@@ -36,7 +36,7 @@ void MTestThread::run() {
     QTcpSocket * m_tcpSocket = new QTcpSocket();
     m_netManager->setTCPSocket(m_tcpSocket);
     QUrl m_url;
-    m_url.setHost("localhost");
+    m_url.setHost("81.177.167.73"); // "localhost" "81.177.167.73"
     m_url.setPort(8085-1);
     m_netManager->makeConnect(m_url);
     exec();
@@ -51,7 +51,7 @@ void MTestThread::newBinMsgFromServer(QByteArray in) {
     }
 
     QByteArray zz1;
-    for ( int i=0; i<60000; ++i ) {
+    for ( int i=0; i<60; ++i ) { // 60000
         zz1.append("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789\r\n");
     }
     if ( in != zz1) {
@@ -74,7 +74,7 @@ void MTestThread::socketConnected() {
 
 void MTestThread::timeoutSlot() {
     QByteArray zz;
-    for ( int i=0; i<60000; ++i ) {
+    for ( int i=0; i<60; ++i ) { // 60000
         zz.append("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789\r\n");
     }
     if ( m_packetN<900001 ) {
